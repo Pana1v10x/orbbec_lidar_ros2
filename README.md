@@ -119,38 +119,23 @@ New device connected: 192.168.1.121:2228
 
 #### Step 2: Set the Device IP Address
 
-You can set the device IP address using one of two methods:
-
-**Method 1: Auto-Discovery (Recommended when only one device is connected)**
-
-If you have only one device connected, you can let the tool automatically discover it:
+Use the current IP address from Step 1 to set a new IP address for the device:
 
 ```bash
-ros2 run orbbec_lidar_ros2 set_device_ip_node <new_ip>
+ros2 run orbbec_lidar_ros2 set_device_ip_node <current_ip> <new_ip> [port]
 ```
 
-Example:
+Example (using the IP from Step 1):
 ```bash
-ros2 run orbbec_lidar_ros2 set_device_ip_node 192.168.1.200
-```
-
-**Method 2: Manual IP Specification**
-
-If you have multiple devices or want to specify the current IP explicitly:
-
-```bash
-ros2 run orbbec_lidar_ros2 set_device_ip_node <new_ip> <current_ip> [port]
-```
-
-Example:
-```bash
-ros2 run orbbec_lidar_ros2 set_device_ip_node 192.168.1.200 192.168.1.121
+ros2 run orbbec_lidar_ros2 set_device_ip_node 192.168.1.121 192.168.1.200
 ```
 
 Or with a custom port:
 ```bash
-ros2 run orbbec_lidar_ros2 set_device_ip_node 192.168.1.200 192.168.1.121 2228
+ros2 run orbbec_lidar_ros2 set_device_ip_node 192.168.1.121 192.168.1.200 2228
 ```
+
+**Note:** You must always specify the current IP address. Use `list_devices_node` (from Step 1) to find the current IP if you don't know it.
 
 #### Step 3: Update Configuration File
 
@@ -173,7 +158,7 @@ After successfully changing the device IP address, update the configuration file
 
 - **Network Configuration**: Ensure the new IP address is on the same subnet as your computer and does not conflict with other devices on your network.
 
-- **Multiple Devices**: If multiple devices are detected, the tool will list them and ask you to specify which device to configure by providing the current IP address.
+- **Multiple Devices**: If multiple devices are detected when listing, note each device's IP address and specify the correct current IP when setting the new IP.
 
 - **Persistence**: The tool automatically saves the configuration to the device's flash memory, so the new IP will persist after reboot.
 

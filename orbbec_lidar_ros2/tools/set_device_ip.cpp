@@ -1,103 +1,28 @@
 #include <iostream>
 #include <string>
-#include <thread>
-#include <chrono>
-#include <cctype>
 #include "orbbec_lidar/orbbec_lidar.hpp"
 
 int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    std::cout << "Usage: " << argv[0] << " <new_ip> [current_ip] [port]" << std::endl;
-    std::cout << "       " << argv[0] << " <new_ip> [port]" << std::endl;
+  if (argc < 3) {
+    std::cout << "Usage: " << argv[0] << " <current_ip> <new_ip> [port]" << std::endl;
     std::cout << std::endl;
     std::cout << "Examples:" << std::endl;
-    std::cout << "  " << argv[0] << " 192.168.1.200" << std::endl;
-    std::cout << "    (Auto-discover device and set IP to 192.168.1.200)" << std::endl;
-    std::cout << "  " << argv[0] << " 192.168.1.200 192.168.1.100" << std::endl;
+    std::cout << "  " << argv[0] << " 192.168.1.100 192.168.1.200" << std::endl;
     std::cout << "    (Connect to device at 192.168.1.100 and set IP to 192.168.1.200)" << std::endl;
-    std::cout << "  " << argv[0] << " 192.168.1.200 192.168.1.100 2228" << std::endl;
+    std::cout << "  " << argv[0] << " 192.168.1.100 192.168.1.200 2228" << std::endl;
     std::cout << "    (Same as above, with custom port)" << std::endl;
     std::cout << std::endl;
     std::cout << "This tool changes the hardware IP address of the lidar device." << std::endl;
-    std::cout << "If current_ip is not provided, the tool will auto-discover devices." << std::endl;
-    std::cout << "If multiple devices are found, you must specify the current_ip." << std::endl;
+    std::cout << "You must connect to the device at its current IP first." << std::endl;
+    std::cout << std::endl;
+    std::cout << "To find the current IP address of your device, use:" << std::endl;
+    std::cout << "  ros2 run orbbec_lidar_ros2 list_devices_node" << std::endl;
     return 1;
   }
 
-  std::string new_ip = argv[1];
-  std::string current_ip;
-  uint16_t port = 2228;
-  
-  // Parse arguments: new_ip [current_ip] [port]
-  if (argc >= 3) {
-    // Check if third argument is a port number (all digits) or an IP address
-    std::string arg3 = argv[2];
-    bool is_port = true;
-    for (char c : arg3) {
-      if (!std::isdigit(c)) {
-        is_port = false;
-        break;
-      }
-    }
-    
-    if (is_port && arg3.length() <= 5) {
-      // Third argument is a port number, so current_ip was not provided
-      port = static_cast<uint16_t>(std::stoi(arg3));
-    } else {
-      // Third argument is an IP address (current_ip)
-      current_ip = arg3;
-      if (argc >= 4) {
-        port = static_cast<uint16_t>(std::stoi(argv[3]));
-      }
-    }
-  }
-
-  // Auto-discover device if current_ip not provided
-  if (current_ip.empty()) {
-    std::cout << "Auto-discovering devices..." << std::endl;
-    try {
-      auto device_manager = std::make_shared<ob_lidar::DeviceManager>();
-      // Wait a few seconds for device discovery
-      std::this_thread::sleep_for(std::chrono::seconds(3));
-      
-      auto devices = device_manager->getDevices();
-      
-      if (devices.empty()) {
-        std::cerr << "ERROR: No devices found. Please specify the current IP address:" << std::endl;
-        std::cerr << "  " << argv[0] << " " << new_ip << " <current_ip> [port]" << std::endl;
-        return 1;
-      } else if (devices.size() > 1) {
-        std::cerr << "ERROR: Multiple devices found. Please specify which device to use:" << std::endl;
-        std::cerr << "Found devices:" << std::endl;
-        for (size_t i = 0; i < devices.size(); ++i) {
-          try {
-            std::string device_ip = ob_lidar::getIPAddress(devices[i]);
-            std::cerr << "  " << (i + 1) << ". " << device_ip << std::endl;
-          } catch (...) {
-            std::cerr << "  " << (i + 1) << ". (Unable to get IP)" << std::endl;
-          }
-        }
-        std::cerr << std::endl;
-        std::cerr << "Usage: " << argv[0] << " " << new_ip << " <current_ip> [port]" << std::endl;
-        return 1;
-      } else {
-        // Exactly one device found
-        try {
-          current_ip = ob_lidar::getIPAddress(devices[0]);
-          std::cout << "Found device at: " << current_ip << std::endl;
-        } catch (const std::exception& e) {
-          std::cerr << "ERROR: Failed to get IP address from discovered device: " << e.what() << std::endl;
-          std::cerr << "Please specify the current IP address manually." << std::endl;
-          return 1;
-        }
-      }
-    } catch (const std::exception& e) {
-      std::cerr << "ERROR: Failed to discover devices: " << e.what() << std::endl;
-      std::cerr << "Please specify the current IP address manually:" << std::endl;
-      std::cerr << "  " << argv[0] << " " << new_ip << " <current_ip> [port]" << std::endl;
-      return 1;
-    }
-  }
+  std::string current_ip = argv[1];
+  std::string new_ip = argv[2];
+  uint16_t port = (argc >= 4) ? static_cast<uint16_t>(std::stoi(argv[3])) : 2228;
 
   std::cout << "Changing device hardware IP address:" << std::endl;
   std::cout << "  Current IP: " << current_ip << std::endl;
