@@ -16,7 +16,7 @@ Before using the Orbbec LiDAR ROS2 driver, ensure the following dependencies are
 Clone the Orbbec LiDAR ROS2 driver repository from GitHub:
 
 ```bash
-git clone https://github.com/orbbec/orbbec_lidar_ros2.git
+git clone https://github.com/Pana1v10x/orbbec_lidar_ros2
 ```
 
 ### 1.3. Build the Package
