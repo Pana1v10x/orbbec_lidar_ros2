@@ -51,7 +51,6 @@ set(dependencies
     rclcpp_components
     sensor_msgs
     std_msgs
-    orbbec_lidar_msgs
 )
 foreach (dep IN LISTS dependencies)
     find_package(${dep} REQUIRED)
