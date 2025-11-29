@@ -56,6 +56,19 @@ foreach (dep IN LISTS dependencies)
     find_package(${dep} REQUIRED)
 endforeach ()
 
+# Try to find orbbec_lidar_sdk via colcon first, fallback to local SDK
+# Set CMAKE_PREFIX_PATH to include install directory for colcon builds
+get_filename_component(_COLCON_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/../../../../install" ABSOLUTE)
+list(APPEND CMAKE_PREFIX_PATH "${_COLCON_PREFIX}")
+find_package(orbbec_lidar_sdk QUIET PATHS "${_COLCON_PREFIX}")
+if(orbbec_lidar_sdk_FOUND)
+    message(STATUS "Found orbbec_lidar_sdk via colcon")
+    set(USE_COLCON_SDK TRUE)
+else()
+    message(STATUS "Using local SDK from sdk/lib directory")
+    set(USE_COLCON_SDK FALSE)
+endif()
+
 add_library(orbbec_lidar_ros2 SHARED
     src/dynamic_params.cpp
     src/ob_lidar_driver.cpp
@@ -81,10 +94,16 @@ target_include_directories(orbbec_lidar_ros2
 
 ament_target_dependencies(orbbec_lidar_ros2 ${dependencies})
 
-target_link_libraries(orbbec_lidar_ros2
-    orbbec_lidar_sdk
-    -L${LIDAR_SDK_LIBS_DIR}
-)
+if(USE_COLCON_SDK)
+    target_link_libraries(orbbec_lidar_ros2
+        orbbec_lidar_sdk
+    )
+else()
+    target_link_libraries(orbbec_lidar_ros2
+        orbbec_lidar_sdk
+        -L${LIDAR_SDK_LIBS_DIR}
+    )
+endif()
 
 rclcpp_components_register_node(${PROJECT_NAME}
     PLUGIN "ob_lidar::OBLidarDriver"
@@ -102,10 +121,16 @@ target_include_directories(list_devices_node
 
 ament_target_dependencies(list_devices_node ${dependencies})
 
-target_link_libraries(list_devices_node
-    orbbec_lidar_sdk
-    -L${LIDAR_SDK_LIBS_DIR}
-)
+if(USE_COLCON_SDK)
+    target_link_libraries(list_devices_node
+        orbbec_lidar_sdk
+    )
+else()
+    target_link_libraries(list_devices_node
+        orbbec_lidar_sdk
+        -L${LIDAR_SDK_LIBS_DIR}
+    )
+endif()
 
 add_executable(set_device_ip_node
     tools/set_device_ip.cpp
@@ -118,10 +143,16 @@ target_include_directories(set_device_ip_node
 
 ament_target_dependencies(set_device_ip_node ${dependencies})
 
-target_link_libraries(set_device_ip_node
-    orbbec_lidar_sdk
-    -L${LIDAR_SDK_LIBS_DIR}
-)
+if(USE_COLCON_SDK)
+    target_link_libraries(set_device_ip_node
+        orbbec_lidar_sdk
+    )
+else()
+    target_link_libraries(set_device_ip_node
+        orbbec_lidar_sdk
+        -L${LIDAR_SDK_LIBS_DIR}
+    )
+endif()
 
 add_executable(verify_device_ip_node
     tools/verify_device_ip.cpp
@@ -134,10 +165,16 @@ target_include_directories(verify_device_ip_node
 
 ament_target_dependencies(verify_device_ip_node ${dependencies})
 
-target_link_libraries(verify_device_ip_node
-    orbbec_lidar_sdk
-    -L${LIDAR_SDK_LIBS_DIR}
-)
+if(USE_COLCON_SDK)
+    target_link_libraries(verify_device_ip_node
+        orbbec_lidar_sdk
+    )
+else()
+    target_link_libraries(verify_device_ip_node
+        orbbec_lidar_sdk
+        -L${LIDAR_SDK_LIBS_DIR}
+    )
+endif()
 
 install(TARGETS
     ${PROJECT_NAME}
